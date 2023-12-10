@@ -3,4 +3,5 @@
 !.gitignore
 
 !knapsack.hpp
+!knapsack2.hpp
 !huffman_coding.hpp
