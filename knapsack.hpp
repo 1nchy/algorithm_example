@@ -10,28 +10,28 @@
 
 using namespace std;
 
-int knap_sack(
-    const vector<int>& _weight,
-    const vector<int>& _value,
-    int _capacity
+size_t knap_sack(
+    const vector<size_t>& _weight,
+    const vector<size_t>& _value,
+    size_t _capacity
 );
 void knap_sack_traceback(
-    const vector<int>& _weight,
-    const vector<vector<int>>& _w,
-    const vector<vector<int>>& _v
+    const vector<size_t>& _weight,
+    const vector<vector<size_t>>& _w,
+    const vector<vector<size_t>>& _v
 );
 
 
 auto knap_sack(
-    const vector<int>& _weight,
-    const vector<int>& _value,
-    int _capacity
-) -> int {
+    const vector<size_t>& _weight,
+    const vector<size_t>& _value,
+    size_t _capacity
+) -> size_t {
     // JNS jump nodes set
     assert(_weight.size() == _value.size());
     const size_t _n = _weight.size();
-    vector<vector<int>> _w(_n+1); // _w[i][j] means weight of plan %j in %i-th JNS.
-    vector<vector<int>> _v(_n+1); // _v[i][j] means value of plan %j in %i-th JNS.
+    vector<vector<size_t>> _w(_n+1); // _w[i][j] means weight of plan %j in %i-th JNS.
+    vector<vector<size_t>> _v(_n+1); // _v[i][j] means value of plan %j in %i-th JNS.
     // assert(_w[_i].size() == _v[_i].size()), elements in _w[_i] and _v[_i] are sorted.
     _w[0].emplace_back(0); _v[0].emplace_back(0);
 
@@ -45,9 +45,9 @@ auto knap_sack(
         for (size_t _j = 0; _j < _ni; ++_j) { // traverse S_{i} to generate P
             // calculate the position of each node in S_{i} where they could appear in next JNS.
             // %<_wsi, _vsi> = P
-            const int _wsi = _wi[_j] + _weight[_i]; // total weight if selected %_i
+            const size_t _wsi = _wi[_j] + _weight[_i]; // total weight if selected %_i
             if (_wsi > _capacity) break; // overloaded
-            int _vsi = _vi[_j] + _value[_i]; // total value if selected %_i
+            size_t _vsi = _vi[_j] + _value[_i]; // total value if selected %_i
             while (_k < _ni && _wi[_k] < _wsi) { // nodes in S_{i} on the left of P, they have chance to appear in next JNS.
                 _wI.emplace_back(_wi[_k]);
                 _vI.emplace_back(_vi[_k]);
@@ -77,23 +77,23 @@ auto knap_sack(
 }
 
 auto knap_sack_traceback(
-    const vector<int>& _weight,
-    const vector<vector<int>>& _w,
-    const vector<vector<int>>& _v
+    const vector<size_t>& _weight,
+    const vector<vector<size_t>>& _w,
+    const vector<vector<size_t>>& _v
 ) -> void {
     assert(_w.size() == _v.size());
     const size_t _n = _weight.size();
     const size_t _ns = _w.back().size();
-    vector<int> _indices(_ns);
+    vector<size_t> _indices(_ns);
     iota(_indices.begin(), _indices.end(), 0);
-    vector<int> _serial(_n, 0);
+    vector<size_t> _serial(_n, 0);
 
-    auto find = [&](int _x, int _k) -> bool {
+    auto find = [&](size_t _x, size_t _k) -> bool {
         const auto& _wk = _w[_k];
         return binary_search(_wk.begin(), _wk.end(), _x);
     };
 
-    int _wx = -1;
+    size_t _wx = -1;
     for (size_t _i = _n; _i > 0; --_i) {
         const auto& _wi = _w[_i];
         const auto& _vi = _v[_i];
@@ -108,13 +108,13 @@ auto knap_sack_traceback(
             _wx = -1;
         }
     }
-    printf("[");
+    cout << '[';
     for (size_t _i = 0; _i < _serial.size(); ++_i) {
-        printf("%d", _serial[_i]);
+        cout << _serial[_i];
         if (_i+1 != _serial.size()) {
-            printf(", ");
+            cout << ", ";
         }
     }
-    printf("].\n");
+    cout << "]." << endl;
 }
 #endif // _KNAPSACK_HPP_
