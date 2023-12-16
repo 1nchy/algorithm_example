@@ -58,7 +58,7 @@ auto knap_sack2(
                         _cc -= _weight[_j]; _pred_vl += _value[_j];
                     }
                 }
-                return;
+                assert(_pred_vu >= _pred_vl); return;
             }
             _cc -= _weight[_i]; _pred_vl += _value[_i];
         }
