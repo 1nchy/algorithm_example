@@ -23,7 +23,7 @@ enum direct_t {
     up, down, left, right
 };
 
-int getchar_unblocked();
+int getchar_unbuffered();
 
 template <size_t _N> class table_t {
     typedef unsigned element_type;
@@ -361,7 +361,7 @@ template <size_t _N> auto table_t<_N>::demo() -> void {
     tcsetattr(fileno(stdin), TCSANOW, &_new_setting);
     this->print();
     while (!solved()) {
-        int _c = getchar_unblocked();
+        int _c = getchar_unbuffered();
         if (_c == 'a') { // left
             if (!this->left()) {
                 continue;
@@ -435,7 +435,7 @@ template <size_t _N> auto table_t<_N>::clear_print() const -> void {
 };
 
 
-int getchar_unblocked() {
+int getchar_unbuffered() {
     int in;
     struct termios new_settings;
     struct termios stored_settings;
