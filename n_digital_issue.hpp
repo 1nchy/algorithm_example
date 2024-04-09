@@ -16,11 +16,14 @@
 
 #include <cassert>
 
+#define EULER_DISTANCE_EVALUATE
+// #undef EULER_DISTANCE_EVALUATE
+
 enum direct_t {
     up, down, left, right
 };
 
-int get_char();
+int getchar_unblocked();
 
 template <size_t _N> class table_t {
     typedef unsigned element_type;
@@ -29,6 +32,7 @@ template <size_t _N> class table_t {
         point_t(const point_t&) = default;
         point_t& operator=(const point_t&) = default;
         size_t _x; size_t _y;
+        // friend double distance(const point_t&, const point_t&);
     };
 public:
     table_t(std::initializer_list<std::initializer_list<element_type>> _ill);
@@ -38,6 +42,10 @@ public:
     bool solvable() const;
     void demo();
     void shuffle();
+    // template <size_t _L> friend double distance(const typename table_t<_L>::point_t&, const typename table_t<_L>::point_t&);
+    friend double distance(const point_t& _a, const point_t& _b) {
+        return std::sqrt(std::pow((_a._x - _b._x),2 ) + std::pow((_a._y - _b._y), 2));
+    }
 
 private:
     element_type& operator[](const point_t& _p) { return _data[_p._x][_p._y]; }
@@ -114,6 +122,20 @@ template <size_t _N> auto table_t<_N>::right() -> bool {
     return true;
 };
 
+#ifdef EULER_DISTANCE_EVALUATE
+template <size_t _N> auto table_t<_N>::evaluate() const -> size_t {
+    size_t _cost = 0;
+    for (size_t _i = 0; _i < _N; ++_i) {
+        for (size_t _j = 0; _j < _N; ++_j) {
+            // const size_t _k = (_i * _N + _j + 1) % (_N * _N);
+            const point_t _p(_i, _j);
+            const point_t _t(_data[_i][_j] / _N, _data[_i][_j] % _N);
+            _cost += distance(_p, _t);
+        }
+    }
+    return _cost;
+};
+#else
 template <size_t _N> auto table_t<_N>::evaluate() const -> size_t {
     size_t _cost = 0;
     for (size_t _i = 0; _i < _N; ++_i) {
@@ -126,6 +148,7 @@ template <size_t _N> auto table_t<_N>::evaluate() const -> size_t {
     }
     return _cost;
 };
+#endif // EULER_DISTANCE_EVALUATE
 template <size_t _N> auto table_t<_N>::signature() const -> size_t {
     size_t _seed = _N * _N;
     for (const auto& _vi : _data) {
@@ -338,7 +361,7 @@ template <size_t _N> auto table_t<_N>::demo() -> void {
     tcsetattr(fileno(stdin), TCSANOW, &_new_setting);
     this->print();
     while (!solved()) {
-        int _c = get_char();
+        int _c = getchar_unblocked();
         if (_c == 'a') { // left
             if (!this->left()) {
                 continue;
@@ -411,7 +434,8 @@ template <size_t _N> auto table_t<_N>::clear_print() const -> void {
     }
 };
 
-int get_char() {
+
+int getchar_unblocked() {
     int in;
     struct termios new_settings;
     struct termios stored_settings;
