@@ -44,7 +44,9 @@ public:
     void shuffle();
     // template <size_t _L> friend double distance(const typename table_t<_L>::point_t&, const typename table_t<_L>::point_t&);
     friend double distance(const point_t& _a, const point_t& _b) {
-        return std::sqrt(std::pow((_a._x - _b._x),2 ) + std::pow((_a._y - _b._y), 2));
+        const size_t _delta_x = (_a._x > _b._x ? _a._x - _b._x : _b._x - _a._x);
+        const size_t _delta_y = (_a._y > _b._y ? _a._y - _b._y : _b._y - _a._y);
+        return std::sqrt(std::pow(_delta_x, 2) + std::pow(_delta_y, 2));
     }
 
 private:
@@ -128,9 +130,10 @@ template <size_t _N> auto table_t<_N>::evaluate() const -> size_t {
     for (size_t _i = 0; _i < _N; ++_i) {
         for (size_t _j = 0; _j < _N; ++_j) {
             // const size_t _k = (_i * _N + _j + 1) % (_N * _N);
+            if (_data[_i][_j] == 0) continue;
             const point_t _p(_i, _j);
-            const point_t _t(_data[_i][_j] / _N, _data[_i][_j] % _N);
-            _cost += distance(_p, _t);
+            const point_t _t(_data[_i][_j] / _N, (_data[_i][_j] - 1) % _N);
+            _cost += std::ceil(distance(_p, _t));
         }
     }
     return _cost;
@@ -211,6 +214,7 @@ template <size_t _N> auto table_t<_N>::n_digital_issue()
         if (_s->_cost >= _max_cost) continue;
         const auto _s_sign = _s->_t.signature();
         if (_visited.count(_s_sign) && _visited[_s_sign] < _s->_cost) continue;
+        // if (_s->_t.solved()) {
         if (_s->_cost == _s->_step) {
             _target = _s;
             _max_cost = std::min(_max_cost, _s->_cost);
@@ -289,11 +293,11 @@ template <size_t _N> auto table_t<_N>::n_digital_issue()
             else delete _right;
         }
     }
+    std::cout << "visited.size() = " << _visited.size() << std::endl;
     if (_target == nullptr) {
         return {};
     }
     assert(leaf_node(_target));
-    std::cout << "visited.size() = " << _visited.size() << std::endl;
     std::vector<direct_t> _path; _path.reserve(_target->_step);
     for (const tree_node* _i = _target; _i != &_root; _i = _i->_parent) {
         const tree_node* const _ip = _i->_parent;
